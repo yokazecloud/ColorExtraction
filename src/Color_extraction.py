@@ -51,9 +51,32 @@ def color_extraction_video(input_file: str, hue) -> None:
         lower_hue : int = TARGET_HUE - 10
         mask = None
         
-        mask_lower  = np.array([lower_hue, 50, 50])
-        mask_upper  = np.array([upper_hue, 255, 255])
-        mask        = cv2.inRange(HSV, mask_lower, mask_upper)
+        if upper_hue > 180:
+            lower1 = np.array([              0,  50,  50])
+            upper1 = np.array([upper_hue % 180, 255, 255])
+            mask1 = cv2.inRange(HSV, lower1, upper1)
+            
+            lower2 = np.array([      lower_hue,  50,  50])
+            upper2 = np.array([            180, 255, 255])
+            mask2 = cv2.inRange(HSV, lower2, upper2)
+            
+            mask = cv2.bitwise_or(mask1, mask2)
+            
+        elif lower_hue < 0:
+            lower1 = np.array([              0,  50,  50])
+            upper1 = np.array([      upper_hue, 255, 255])
+            mask1 = cv2.inRange(HSV, lower1, upper1)
+            
+            lower2 = np.array([lower_hue % 180,  50,  50])
+            upper2 = np.array([            180, 255, 255])
+            mask2 = cv2.inRange(HSV, lower2, upper2)
+            
+            mask = cv2.bitwise_or(mask1, mask2)
+            
+        else:
+            lower = np.array([lower_hue, 50, 50])
+            upper = np.array([upper_hue, 255, 255])
+            mask = cv2.inRange(HSV, lower, upper)
         
         gray_image  = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray_mask   = cv2.bitwise_not(mask)
